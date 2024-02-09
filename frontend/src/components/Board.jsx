@@ -14,6 +14,11 @@ const Board = ({ userName, RoomId }) => {
   var prevX = nextCursor?.x;
   var prevY = nextCursor?.y;
 
+  
+  useEffect(() => {
+    socket.emit("join-room",RoomId);
+  }, [])
+  
   //cursour hover
   socket.on("mouse-moved", (data) => {
     setNextCursor(data);
