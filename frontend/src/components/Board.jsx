@@ -4,8 +4,9 @@ import { LuMousePointer2 } from "react-icons/lu";
 import _debounce from "lodash/debounce";
 import { useSocketContext } from "../service/SocketContextProvider";
 import ToolBar from "./ToolBar";
-
+import RoomIdCard from "./RoomIdCard";
 const Board = ({ userName, RoomId }) => {
+  const initialized = useRef(false);
   const { socket } = useSocketContext();
   const [cursor, setCursor] = useState({ x: null, y: null });
   const [nextCursor, setNextCursor] = useState(null);
@@ -14,9 +15,14 @@ const Board = ({ userName, RoomId }) => {
   var prevX = nextCursor?.x;
   var prevY = nextCursor?.y;
 
-  
   useEffect(() => {
-    socket.emit("join-room",RoomId);
+    const joinRoom=()=>{
+      socket.emit("join-room",RoomId);
+    }
+    if(!initialized.current){
+      initialized.current=true;
+      joinRoom();
+    }
   }, [])
   
   //cursour hover
@@ -31,18 +37,18 @@ const Board = ({ userName, RoomId }) => {
   });
   const debouncedMouseMove = _debounce((x, y) => {
     if (x != prevX || y != prevY) {
-      socket.emit("mouse-moved", { x, y });
+      socket.emit("mouse-moved", { x, y },RoomId);
     }
   }, 100);
 
   const HandleMouseLeave = () => {
     setTimeout(() => {
-      socket.emit("mouse-left", false);
+      socket.emit("mouse-left", false,RoomId);
     }, 50);
   };
   const HandleMouseEnter = () => {
     setTimeout(() => {
-      socket.emit("mouse-entered", true);
+      socket.emit("mouse-entered", true, RoomId);
     }, 50);
   };
 
@@ -97,7 +103,7 @@ const Board = ({ userName, RoomId }) => {
     context.closePath();
     var base64Image = canvasRef.current.toDataURL("image/png");
     setTimeout(() => {
-      socket.emit("canvas-data", base64Image);
+      socket.emit("canvas-data", base64Image,RoomId);
     }, 100);
     setIsDrawing(false);
   };
@@ -110,7 +116,7 @@ const Board = ({ userName, RoomId }) => {
         canvasRef.current.width,
         canvasRef.current.height
       );
-      socket.emit("clear-canvas");
+      socket.emit("clear-canvas", RoomId);
     }
   };
 
@@ -132,7 +138,8 @@ const Board = ({ userName, RoomId }) => {
     }
   });
   return (
-    <div className="flex-col justify-center my-8 items-center">
+    <div className="flex-col justify-center my-8 relative items-center">
+      <RoomIdCard RoomId={RoomId}/>
       <ToolBar
         brushSize={brushSize}
         setEraserMode={setEraserMode}

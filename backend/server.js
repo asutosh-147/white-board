@@ -15,23 +15,24 @@ const io = new Server(httpServer, {
 
 io.on("connection", (socket) => {
     console.log('socket connected :',socket.id);
-    // socket.on("join-room",(roomId)=>{
-    //   socket.join(roomId);
-    // })
-    socket.on("mouse-moved",(data)=>{
-      socket.broadcast.emit("mouse-moved",data);
+    socket.on("join-room",(roomId)=>{
+      socket.join(roomId);
+      console.log(roomId);
     })
-    socket.on("mouse-left",(visibility)=>{
-      socket.broadcast.emit("mouse-left",visibility)
+    socket.on("mouse-moved",(data,roomId)=>{
+      socket.to(roomId).emit("mouse-moved",data);
     })
-    socket.on("mouse-entered",(visibility)=>{
-      socket.broadcast.emit("mouse-entered",visibility)
+    socket.on("mouse-left",(visibility,roomId)=>{
+      socket.to(roomId).emit("mouse-left",visibility)
     })
-    socket.on("canvas-data",(canvasImage)=>{
-      socket.broadcast.emit("canvas-data",canvasImage);
+    socket.on("mouse-entered",(visibility,roomId)=>{
+      socket.to(roomId).emit("mouse-entered",visibility)
     })
-    socket.on("clear-canvas",()=>{
-      socket.broadcast.emit("clear-canvas");
+    socket.on("canvas-data",(canvasImage,roomId)=>{
+      socket.to(roomId).emit("canvas-data",canvasImage);
+    })
+    socket.on("clear-canvas",(roomId)=>{
+      socket.to(roomId).emit("clear-canvas");
     })
     console.log(io.engine.clientsCount);
 });
