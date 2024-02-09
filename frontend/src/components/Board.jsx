@@ -170,7 +170,10 @@ const Board = ({ userName, RoomId }) => {
           display: visible ? `block` : `none`,
         }}
       >
-        <LuMousePointer2 />
+        <div className="relative">
+          <LuMousePointer2 />
+          <p className="text-sm absolute top-2 -right-10 p-2">{userName}</p>
+        </div>
       </div>
     </div>
   );
